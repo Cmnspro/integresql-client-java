@@ -4,19 +4,13 @@ import at.allaboutapps.integresql.client.IntegresqlJavaClient;
 import at.allaboutapps.integresql.client.dto.TemplateDatabase;
 import at.allaboutapps.integresql.config.IntegresqlClientConfig;
 import at.allaboutapps.integresql.client.dto.DatabaseConfig;
-import at.allaboutapps.integresql.client.dto.DatabaseConfig;
 import at.allaboutapps.integresql.client.dto.TestDatabase;
-import at.allaboutapps.integresql.exception.DatabaseDiscardedException;
-import at.allaboutapps.integresql.exception.IntegresqlException;
-import at.allaboutapps.integresql.exception.TemplateNotFoundException;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -25,14 +19,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Integration tests for IntegresqlJavaClient using Testcontainers.

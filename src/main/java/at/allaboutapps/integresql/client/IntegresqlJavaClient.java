@@ -29,7 +29,6 @@ import java.util.function.Consumer; // For setup callbacks
  */
 public class IntegresqlJavaClient implements AutoCloseable {
 
-    private final IntegresqlClientConfig config;
     private final URI baseApiUri;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -41,7 +40,7 @@ public class IntegresqlJavaClient implements AutoCloseable {
      * @param config Client configuration.
      */
     public IntegresqlJavaClient(IntegresqlClientConfig config) {
-        this.config = Objects.requireNonNull(config, "Config cannot be null");
+        IntegresqlClientConfig config1 = Objects.requireNonNull(config, "Config cannot be null");
         this.objectMapper = new ObjectMapper();
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1) // Or HTTP_2 if server supports it
@@ -190,16 +189,17 @@ public class IntegresqlJavaClient implements AutoCloseable {
         // The Go client uses POST /templates, let's stick to that unless API doc differs
         ResponseWrapper<TemplateDatabase> response = doRequestInternal("POST", "/templates", payload, TemplateDatabase.class);
 
-        switch (response.statusCode) {
-            case 200: // OK
-                return response.body;
-            case 423: // Locked (StatusLocked in Go)
-                throw new TemplateAlreadyInitializedException("Template initialization already started or finished for hash: " + hash);
-            case 503: // Service Unavailable
-                throw new ManagerNotReadyException("IntegreSQL manager service is not ready.");
-            default:
-                throw new IntegresqlException("Initialize template failed with unexpected status", response.statusCode);
-        }
+        // Locked (StatusLocked in Go)
+        // Service Unavailable
+        return switch (response.statusCode) {
+            case 200 -> // OK
+                    response.body;
+            case 423 ->
+                    throw new TemplateAlreadyInitializedException("Template initialization already started or finished for hash: " + hash);
+            case 503 -> throw new ManagerNotReadyException("IntegreSQL manager service is not ready.");
+            default ->
+                    throw new IntegresqlException("Initialize template failed with unexpected status", response.statusCode);
+        };
     }
 
     /**
@@ -309,9 +309,6 @@ public class IntegresqlJavaClient implements AutoCloseable {
             // This is not an error, template is already ready. Log maybe?
             System.out.println("Template " + hash + " is already initialized.");
             return; // Success (idempotent)
-        } catch (Exception e) {
-            // Handle other init errors (e.g., ManagerNotReady) or potential discard errors
-            throw e; // Re-throw other initialization or finalization errors
         }
     }
 
@@ -376,8 +373,6 @@ public class IntegresqlJavaClient implements AutoCloseable {
         } catch (TemplateAlreadyInitializedException e) {
             System.out.println("Template " + hash + " is already initialized.");
             return; // Success
-        } catch (Exception e) {
-            throw e; // Re-throw other errors
         }
     }
 

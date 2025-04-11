@@ -22,7 +22,7 @@ public class DatabaseConfig {
     @JsonProperty("database")
     public String database;
 
-    @JsonProperty(required = false)
+    @JsonProperty()
     public HashMap<String, String> additionalParams;
 
     // Default constructor (needed for Jackson)
